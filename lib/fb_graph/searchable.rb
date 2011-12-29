@@ -1,10 +1,11 @@
 module FbGraph
   module Searchable
     def self.search(query, options = {})
+      logging = options.delete(:logging)
       klass = options.delete(:class) || Searchable
       query_param = klass.search_query_param
       collection = Collection.new(
-        Node.new(:search).send(:get, options.merge(query_param.to_sym => query))
+        Node.new(:search, :logging => logging).send(:get, options.merge(query_param.to_sym => query))
       )
       yield collection if block_given?
       Searchable::Result.new(query, klass, options.merge(:collection => collection))

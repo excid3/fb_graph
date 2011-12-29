@@ -1,15 +1,17 @@
 require 'tempfile'
+require 'colorize'
 
 module FbGraph
   class Node
     include Comparison
 
-    attr_accessor :identifier, :endpoint, :access_token
+    attr_accessor :identifier, :endpoint, :access_token, :logging
 
     def initialize(identifier, options = {})
       @identifier         = identifier
       @endpoint           = File.join(ROOT_URL, identifier.to_s)
       @access_token       = options[:access_token]
+      @logging            = options[:logging]
       @cached_collections = {}
     end
 
@@ -45,18 +47,21 @@ module FbGraph
     protected
 
     def get(params = {})
+      puts "GET #{@identifier}: #{params.inspect}".colorize(:green) if @logging
       handle_response do
         http_client.get build_endpoint(params), build_params(params)
       end
     end
 
     def post(params = {})
+      puts "POST #{@identifier}: #{params.inspect}".colorize(:blue) if @logging
       handle_response do
         http_client.post build_endpoint(params), build_params(params)
       end
     end
 
     def delete(params = {})
+      puts "DELETE #{@identifier}: #{params.inspect}".colorize(:red) if @logging
       _endpoint_, _params_ = build_endpoint(params), build_params(params)
       _endpoint_ = [_endpoint_, _params_.try(:to_query)].compact.join('?')
       handle_response do
